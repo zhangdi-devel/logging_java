@@ -30,9 +30,9 @@ public abstract class LoggerBase implements Serializable {
 
     protected List<Record> buffer;
 
-    protected abstract void flash() throws RuntimeException;
+    protected abstract void flash() throws Exception;
 
-    private void addRecord(Record r) {
+    private void addRecord(Record r) throws Exception {
         /*
          * if the level of the record is less than the threshold
          * don't add it to buffer
@@ -41,32 +41,32 @@ public abstract class LoggerBase implements Serializable {
         if (r.level.verbose < threshold.verbose) {
             return;
         }
+        buffer.add(r);
         if (buffer.size() >= limit) {
             flash();
         }
-        buffer.add(r);
     }
 
     public void setLevel(Level newLevel) {
         this.threshold = newLevel;
     }
 
-    public void debug(String msg) {
+    public void debug(String msg) throws Exception {
         Record cur = new Record(name, new Date(), Level.Debug, msg);
         addRecord(cur);
     }
 
-    public void info(String msg) {
+    public void info(String msg) throws Exception {
         Record cur = new Record(name, new Date(), Level.Info, msg);
         addRecord(cur);
     }
 
-    public void warn(String msg) {
+    public void warn(String msg) throws Exception {
         Record cur = new Record(name, new Date(), Level.Warn, msg);
         addRecord(cur);
     }
 
-    public void error(String msg) {
+    public void error(String msg) throws Exception {
         Record cur = new Record(name, new Date(), Level.Error, msg);
         addRecord(cur);
     }

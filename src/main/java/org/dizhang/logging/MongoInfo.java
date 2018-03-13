@@ -22,15 +22,19 @@ public class MongoInfo {
     public String db;
     public String collection;
 
-    public MongoInfo(String host, int port, String db, String collection) {
-        this.host = host;
-        this.port = port;
-        this.db = db;
-        this.collection = collection;
+    public MongoInfo(String h, int p, String d, String c) {
+        this.host = h;
+        this.port = p;
+        this.db = d;
+        this.collection = c;
     }
 
     public MongoInfo() {
-        new MongoInfo("localhost", 27017, "logdb", "logs");
+        this("localhost", 27017, "logdb", "logs");
     }
 
+    @Override
+    public String toString() {
+        return String.format("host: %s\nport: %d\ndb: %s\ncollection: %s\n", host, port, db, collection);
+    }
 }

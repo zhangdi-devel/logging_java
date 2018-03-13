@@ -23,6 +23,7 @@ import org.bson.codecs.configuration.CodecRegistry;
 import org.bson.codecs.pojo.PojoCodecProvider;
 
 import java.util.ArrayList;
+
 import static org.bson.codecs.configuration.CodecRegistries.fromProviders;
 import static org.bson.codecs.configuration.CodecRegistries.fromRegistries;
 
@@ -31,6 +32,10 @@ public class LoggerMongoDB extends LoggerBase {
     private static final int MAX_RETRIES = 3;
 
     private MongoCollection<Record> collection;
+
+    long flashed() {
+        return collection.count();
+    }
 
     public LoggerMongoDB(String name, Level level, int bufferSize, MongoInfo mongoInfo) {
 
@@ -53,34 +58,34 @@ public class LoggerMongoDB extends LoggerBase {
     }
 
     public LoggerMongoDB(String name, MongoInfo mongoInfo) {
-        new LoggerMongoDB(name, Level.Debug, 1000, mongoInfo);
+        this(name, Level.Debug, 1000, mongoInfo);
     }
 
 
     public LoggerMongoDB(String name) {
-        new LoggerMongoDB(name, new MongoInfo());
+        this(name, new MongoInfo());
     }
 
-    protected void flash() throws RuntimeException {
+    protected void flash() throws Exception {
 
         if (this.collection == null) {
-            throw new RuntimeException("collection cannot be null");
+            throw new Exception("collection cannot be null");
         } else if (this.buffer == null) {
-            throw new RuntimeException("buffer cannot be null");
+            throw new Exception("buffer cannot be null");
         }
 
         int tries = MAX_RETRIES;
 
         while (tries > 0) {
             try {
-                this.collection.insertMany(new ArrayList<Record>(this.buffer));
+                this.collection.insertMany(this.buffer);
                 break;
             } catch (Exception e) {
                 tries--;
             }
         }
         if (tries <= 0) {
-            throw new RuntimeException("unable to insert buffer to MongoDB");
+            throw new Exception("unable to insert buffer to MongoDB");
         }
         this.buffer = new ArrayList<Record>();
     }
