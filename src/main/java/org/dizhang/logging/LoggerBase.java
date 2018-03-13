@@ -17,8 +17,8 @@
 package org.dizhang.logging;
 
 import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 public abstract class LoggerBase implements Serializable {
 
@@ -28,9 +28,9 @@ public abstract class LoggerBase implements Serializable {
 
     protected int limit;
 
-    protected ArrayList<Record> buffer;
+    protected List<Record> buffer;
 
-    protected abstract void flash();
+    protected abstract void flash() throws RuntimeException;
 
     private void addRecord(Record r) {
         /*

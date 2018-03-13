@@ -28,9 +28,9 @@ import static org.bson.codecs.configuration.CodecRegistries.fromRegistries;
 
 public class LoggerMongoDB extends LoggerBase {
 
+    private static final int MAX_RETRIES = 3;
 
     private MongoCollection<Record> collection;
-
 
     public LoggerMongoDB(String name, Level level, int bufferSize, MongoInfo mongoInfo) {
 
@@ -38,6 +38,7 @@ public class LoggerMongoDB extends LoggerBase {
         this.threshold = level;
         this.limit = bufferSize;
 
+        /* initiate the connection to mongoDB and create the database and collection */
         CodecRegistry pojoCodecRegistry = fromRegistries(MongoClient.getDefaultCodecRegistry(),
                 fromProviders(PojoCodecProvider.builder().automatic(true).build()));
 
@@ -60,8 +61,27 @@ public class LoggerMongoDB extends LoggerBase {
         new LoggerMongoDB(name, new MongoInfo());
     }
 
-    protected void flash() {
-        this.collection.insertMany(new ArrayList<Record>(this.buffer));
+    protected void flash() throws RuntimeException {
+
+        if (this.collection == null) {
+            throw new RuntimeException("collection cannot be null");
+        } else if (this.buffer == null) {
+            throw new RuntimeException("buffer cannot be null");
+        }
+
+        int tries = MAX_RETRIES;
+
+        while (tries > 0) {
+            try {
+                this.collection.insertMany(new ArrayList<Record>(this.buffer));
+                break;
+            } catch (Exception e) {
+                tries--;
+            }
+        }
+        if (tries <= 0) {
+            throw new RuntimeException("unable to insert buffer to MongoDB");
+        }
         this.buffer = new ArrayList<Record>();
     }
 
